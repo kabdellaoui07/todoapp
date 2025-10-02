@@ -1,6 +1,5 @@
 # .github/workflows/android_build.yml
-name: Android Build ToDoApp # اسم سير العمل
-
+name: Android Build ToDoApp 
 on:
   push:
     branches:
