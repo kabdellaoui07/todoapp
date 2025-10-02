@@ -1,0 +1,45 @@
+# .github/workflows/android_build.yml
+name: Android Build ToDoApp # اسم سير العمل
+
+on:
+  push:
+    branches:
+      - main # يتم تشغيله عند الدفع إلى فرع main
+  pull_request:
+    branches:
+      - main # يتم تشغيله عند طلب سحب إلى فرع main
+
+jobs:
+  build_android:
+    runs-on: ubuntu-latest # تشغيل المهمة على نظام Ubuntu
+
+    steps:
+      - name: Checkout code # خطوة لسحب الكود من المستودع
+        uses: actions/checkout@v3
+
+      - name: Set up Python # خطوة لإعداد بيئة بايثون
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9' # استخدم إصدار بايثون 3.9 (يمكنك تغييره إذا كنت تستخدم إصداراً آخر)
+
+      - name: Install Buildozer dependencies # تثبيت الحزم المطلوبة لـ Buildozer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses-dev libbz2-dev libssl-dev libffi-dev libsqlite3-dev liblzma-dev libgdbm-dev libgdbm-compat-dev libreadline-dev libtinfo-dev libxml2-dev libxslt1-dev libc6-dev libffi-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
+          pip install buildozer sh
+
+      - name: Configure Android SDK/NDK # إعداد حزمة تطوير الأندرويد (SDK/NDK)
+        run: |
+          buildozer android update
+
+      - name: Build Android APK (Debug) # بناء ملف APK (وضع التصحيح)
+        run: |
+          # استخدام 'yes |' لمحاولة الموافقة تلقائياً على تراخيص الأندرويد.
+          # في بعض الأحيان، قد يتطلب البناء الأول محلياً لقبول التراخيص يدوياً.
+          yes | buildozer android debug
+
+      - name: Upload APK artifact # تحميل ملف APK الناتج كـ "artifact"
+        uses: actions/upload-artifact@v3
+        with:
+          name: ToDoApp-APK # اسم الـ artifact
+          path: bin/*.apk # المسار الذي يتم فيه حفظ ملف APK بواسطة Buildozer
