@@ -32,21 +32,22 @@ jobs:
           mkdir -p $HOME/android-sdk/cmdline-tools
           unzip cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
           mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
 
       - name: Accept Android SDK Licenses
         run: |
           export ANDROID_SDK_ROOT=$HOME/android-sdk
           yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Install Build Tools
+      - name: Install Android platform & build-tools
         run: |
           export ANDROID_SDK_ROOT=$HOME/android-sdk
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
 
-      - name: Build APK
+      - name: Build APK with Buildozer
         run: |
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          export ANDROIDSDK=$HOME/android-sdk
+          export ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25b
+          export PATH=$ANDROIDSDK/cmdline-tools/latest/bin:$ANDROIDSDK/platform-tools:$ANDROIDSDK/build-tools/34.0.0:$PATH
           buildozer android debug
 
       - name: Upload APK artifact
